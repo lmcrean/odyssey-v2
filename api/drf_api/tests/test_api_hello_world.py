@@ -20,15 +20,9 @@ class HelloWorldAPITest(unittest.TestCase):
         This method tests the lambda_handler function. It should return a 200 status code,
         a body of 'Hello World!', and the correct headers.
         """
-        # Arrange
-        event = {
-            'httpMethod': 'GET',
-            'path': '/hello'
-        }
-        context = {}
 
         # Act
-        response = lambda_handler(event, context)
+        response = lambda_handler()
 
         # Assert
         self.assertEqual(response['statusCode'], 200)
