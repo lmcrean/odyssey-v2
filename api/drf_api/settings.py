@@ -14,14 +14,15 @@ from pathlib import Path
 import os
 import dj_database_url
 
-if os.path.exists('env.py'):
-    import env
+# if os.path.exists('env.py'):
+    # import env
 
 # CLOUDINARY_STORAGE = {
 #     'CLOUDINARY_URL': os.environ.get('CLOUDINARY_URL')
 # }
 # DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 REST_FRAMEWORK = {
