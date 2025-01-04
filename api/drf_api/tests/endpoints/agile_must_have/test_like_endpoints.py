@@ -65,15 +65,16 @@ class LikeEndpointTests(unittest.TestCase):
         """
         pass
 
-    def test_like_analytics_endpoint(self):
+    def test_like_reaction_update(self):
         """
-        Test like analytics endpoint.
+        Test like reaction modifications.
         
         Checks:
-        - Like trends
-        - User engagement
-        - Tier statistics
-        - Time-based metrics
-        - Export data
+        - Change reaction type
+        - Custom reaction support
+        - Reaction validation
+        - Permission checks
+        - Notification updates
+        - Analytics tracking
         """
-        pass 
+        pass
