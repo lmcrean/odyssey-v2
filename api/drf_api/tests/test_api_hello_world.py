@@ -2,13 +2,14 @@
 Module Docstring:
 This module contains tests for the API endpoints.
 
-python -m unittest api/drf_api/tests/test_api_hello_world.py
+python -m unittest drf_api/tests/test_api_hello_world.py
 
 this is the command to run the tests
 """
 
 import unittest
-from drf_api.lambda_function import lambda_handler
+import requests
+from ..lambda_function import lambda_handler
 
 class HelloWorldAPITest(unittest.TestCase):
     """
@@ -20,7 +21,10 @@ class HelloWorldAPITest(unittest.TestCase):
         a body of 'Hello World!', and the correct headers.
         """
         # Arrange
-        event = {}
+        event = {
+            'httpMethod': 'GET',
+            'path': '/hello'
+        }
         context = {}
 
         # Act
@@ -35,6 +39,26 @@ class HelloWorldAPITest(unittest.TestCase):
         )
         self.assertEqual(
             response['headers']['Access-Control-Allow-Origin'],
+            '*'
+        )
+
+    def test_live_api_endpoint(self):
+        """Test the actual deployed API endpoint"""
+        # Arrange
+        url = "https://b6kfw0mhn8.execute-api.eu-west-2.amazonaws.com/default/odyssey-hello-world"
+
+        # Act
+        response = requests.get(url, timeout=10.0)
+
+        # Assert
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.text, 'Hello World!')
+        self.assertEqual(
+            response.headers['Content-Type'],
+            'application/json'
+        )
+        self.assertEqual(
+            response.headers['Access-Control-Allow-Origin'],
             '*'
         )
 
