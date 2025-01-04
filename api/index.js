@@ -5,6 +5,12 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+// TODO: port index.js to python and implement AWS connection.
+// [ ] port index.js to python and ensure python tests pass
+  // [ ] etc.
+// [ ] set up new AWS database for Odyssey
+// [ ] implement DRF framework with S3 bucket for file storage
+// [ ] test deployed version of Odyssey API
 
 const TABLE_NAME = process.env.DYNAMODB_TABLE_NAME || 'default-table-name';
 

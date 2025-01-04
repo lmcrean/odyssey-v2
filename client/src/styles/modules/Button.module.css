@@ -1,0 +1,32 @@
+.Button {
+  font-size: 0.8rem;
+  align-self: center;
+  border-radius: 100px;
+  border-color: var(--color-primary-text);
+  padding: 4px 10px;
+  margin-left: 2px;
+  margin-right: 2px;
+  min-width: 75px;
+  color: var(--color-primary-text);
+}
+
+.Button:hover {
+  opacity: 0.8;
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  cursor: pointer;
+}
+
+
+.Wide {
+  padding: 10px 50px;
+  width: 100%;
+}
+
+.SocialButton:hover {
+  color: var(--color-background) !important;
+}
+
+.UndoButton:hover {
+  border: 2px solid var(--color-primary-text) !important;
+}
