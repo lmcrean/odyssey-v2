@@ -1,6 +1,13 @@
 ```mermaid
 erDiagram
-    %% Entities with media storage (highlighted in blue)
+    S3_Storage_Reference_Guide {
+        string Posts "posts/{post_id}/{file_name}"
+        string Comments "comments/{comment_id}/{file_name}"
+        string Messages "messages/{message_id}/{file_name}"
+        string Profiles "profiles/{user_id}/avatar.jpg"
+        string Covers "profiles/{user_id}/cover.jpg"
+    }
+
     Posts {
         string post_id PK
         string user_id FK
