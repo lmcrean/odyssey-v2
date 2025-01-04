@@ -17,6 +17,7 @@ erDiagram
         array media_urls "S3 references"
         int likes_count
         int comments_count
+        int views_count "total post views"
         string tier_id FK "null for public posts"
     }
 
@@ -52,6 +53,7 @@ erDiagram
         timestamp joined_at
         int followers_count
         int following_count
+        int views_count "total profile views"
         string stripe_account_id "For creators"
     }
 
