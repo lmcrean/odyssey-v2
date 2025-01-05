@@ -4,19 +4,20 @@ Tests complete user journeys involving authentication.
 """
 
 from django.test import TestCase
-# from rest_framework.test import APIClient
-# from django.contrib.auth.models import User
-# from django.urls import reverse
+from rest_framework.test import APIClient
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 class AuthFlowTests(TestCase):
     """Test suite for authentication flows."""
     def setUp(self):
         """Set up test client and base data."""
-        # self.client = APIClient()
+        self.client = APIClient()
         self.base_user_data = {
             'username': 'testuser',
             'password': 'testpass123',
-            'email': 'test@example.com'
+            'name': 'Test User'
         }
 
     def test_register_login_flow(self):
@@ -24,35 +25,44 @@ class AuthFlowTests(TestCase):
         Test complete registration and login flow.
         
         Flow:
-        1. Register new user
-        2. Verify email
+        1. Arrive on landing page
+        2. Register new user
         3. Login
-        4. Get JWT token
-        5. Access protected endpoint
+        4. Access protected endpoint
+        5. Verify welcome message for authenticated user
         """
-        pass
-
-    def test_password_reset_flow(self):
-        """
-        Test complete password reset flow.
+        # 1. Check landing page (unauthenticated)
+        response = self.client.get('/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['message'], 'Welcome to Odyssey')
         
-        Flow:
-        1. Request password reset
-        2. Receive reset token
-        3. Reset password
-        4. Login with new password
-        """
-        pass
-
-    def test_token_refresh_flow(self):
-        """
-        Test JWT token refresh flow.
+        # 2. Register new user
+        register_response = self.client.post('/auth/register/', self.base_user_data, format='json')
+        self.assertEqual(register_response.status_code, 201)
+        register_data = register_response.json()
+        self.assertIn('token', register_data)
+        self.assertIn('user_id', register_data)
+        user_id = register_data['user_id']
         
-        Flow:
-        1. Login and get token
-        2. Use token to access protected route
-        3. Refresh token
-        4. Verify old token invalid
-        5. Verify new token works
-        """
-        pass 
+        # Clear any auth that might have been set
+        self.client.credentials()
+        
+        # 3. Login with new user
+        login_response = self.client.post('/auth/login/', {
+            'username': self.base_user_data['username'],
+            'password': self.base_user_data['password']
+        }, format='json')
+        self.assertEqual(login_response.status_code, 200)
+        login_data = login_response.json()
+        self.assertIn('token', login_data)
+        
+        # Set token for subsequent requests
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {login_data["token"]}')
+        
+        # 4 & 5. Access protected endpoint and verify welcome message
+        welcome_response = self.client.get('/auth/welcome/')
+        self.assertEqual(welcome_response.status_code, 200)
+        self.assertEqual(
+            welcome_response.json()['message'],
+            f'Welcome back, {self.base_user_data["name"]}'
+        )
