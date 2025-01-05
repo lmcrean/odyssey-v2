@@ -1,28 +1,29 @@
 """
-Tests for authentication-related API endpoints.
-Verifies endpoint health and response formats in both local and production environments.
+Test flow for API endpoints.
+Runs tests in a specific order to verify API functionality from basic to complex.
 """
 
 import unittest
 import requests
-import os
 import uuid
 from django.contrib.auth import get_user_model
+from ..lambda_function import lambda_handler
 
 User = get_user_model()
 
-class AuthEndpointTests(unittest.TestCase):
-    """Test suite for auth endpoints."""
+class APIFlowTests(unittest.TestCase):
+    """Test suite for complete API flow."""
+    
     @classmethod
     def setUpClass(cls):
-        """Set up base URLs and test data."""
+        """Set up test environments and base data."""
         cls.local_url = 'http://localhost:8000'
         cls.prod_url = 'https://b6kfw0mhn8.execute-api.eu-west-2.amazonaws.com/default'
+        cls.hello_world_url = f"{cls.prod_url}/odyssey-hello-world"
         cls.headers = {'Content-Type': 'application/json'}
 
     def setUp(self):
         """Set up test-specific data."""
-        # Generate a unique username for each test run
         unique_id = str(uuid.uuid4())[:8]
         self.test_user = {
             'username': f'testuser_{unique_id}',
@@ -38,8 +39,37 @@ class AuthEndpointTests(unittest.TestCase):
         except requests.RequestException as e:
             self.skipTest(f"Skipping {env} environment test: {str(e)}")
 
-    def test_landing_page_endpoint(self):
-        """Test landing page endpoint in both environments."""
+    def test_01_hello_world_lambda(self):
+        """Test 1: Verify Hello World Lambda function works."""
+        # Test the lambda function directly
+        response = lambda_handler()
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(response['body'], 'Hello World!')
+        self.assertEqual(
+            response['headers']['Content-Type'],
+            'application/json'
+        )
+        self.assertEqual(
+            response['headers']['Access-Control-Allow-Origin'],
+            '*'
+        )
+
+    def test_02_hello_world_endpoint(self):
+        """Test 2: Verify Hello World endpoint is accessible."""
+        response = requests.get(self.hello_world_url, timeout=10.0)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.text, 'Hello World!')
+        self.assertEqual(
+            response.headers['Content-Type'],
+            'application/json'
+        )
+        self.assertEqual(
+            response.headers['Access-Control-Allow-Origin'],
+            '*'
+        )
+
+    def test_03_landing_page(self):
+        """Test 3: Verify landing page in both environments."""
         def test_impl(base_url):
             response = requests.get(f"{base_url}/")
             self.assertEqual(response.status_code, 200)
@@ -47,12 +77,12 @@ class AuthEndpointTests(unittest.TestCase):
                 "message": "Welcome to Odyssey"
             })
 
-        # Test both environments
+        # Test local first, then production
         self.run_test_for_environment(test_impl, 'local')
         self.run_test_for_environment(test_impl, 'prod')
 
-    def test_register_endpoint(self):
-        """Test user registration endpoint in both environments."""
+    def test_04_registration(self):
+        """Test 4: Verify user registration in both environments."""
         def test_impl(base_url):
             response = requests.post(
                 f"{base_url}/auth/register/",
@@ -67,12 +97,12 @@ class AuthEndpointTests(unittest.TestCase):
             self.assertEqual(data['username'], self.test_user['username'])
             self.assertEqual(data['name'], self.test_user['name'])
 
-        # Test both environments
+        # Test local first, then production
         self.run_test_for_environment(test_impl, 'local')
         self.run_test_for_environment(test_impl, 'prod')
 
-    def test_login_endpoint(self):
-        """Test login endpoint in both environments."""
+    def test_05_login(self):
+        """Test 5: Verify user login in both environments."""
         def test_impl(base_url):
             # First register a user
             requests.post(
@@ -98,12 +128,12 @@ class AuthEndpointTests(unittest.TestCase):
             self.assertIn('token', data)
             self.assertIn('user_id', data)
 
-        # Test both environments
+        # Test local first, then production
         self.run_test_for_environment(test_impl, 'local')
         self.run_test_for_environment(test_impl, 'prod')
 
-    def test_landing_page_postauth_endpoint(self):
-        """Test landing page post-auth endpoint in both environments."""
+    def test_06_authenticated_welcome(self):
+        """Test 6: Verify authenticated welcome page in both environments."""
         def test_impl(base_url):
             # First register and get token
             register_response = requests.post(
@@ -129,6 +159,6 @@ class AuthEndpointTests(unittest.TestCase):
                 "message": f"Welcome back, {self.test_user['name']}"
             })
 
-        # Test both environments
+        # Test local first, then production
         self.run_test_for_environment(test_impl, 'local')
         self.run_test_for_environment(test_impl, 'prod') 
