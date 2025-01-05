@@ -4,56 +4,57 @@
 
 | Entity | Create | Read | Update | Delete | List | Special Actions |
 |--------|---------|------|---------|---------|------|----------------|
-| Profile | ✓ | ✓ | ✓ | ✓ | ✓ | Avatar Upload |
-| Post | ✓ | ✓ | ✓ | ✓ | ✓ | Media Handling |
-| Comment | ✓ | ✓ | ✓ | ✓ | ✓ | Threading, Moderation |
-| Message | ✓ | ✓ | ✓ | ✓ | ✓ | Media, Status, Reactions |
-| Like | ✓ | ✓ | ✓ | ✓ | ✓ | Reactions, Engagement |
+| User Auth |  |  |  |  |  | Signin, Access tokens |
+| Profile |  |  |  |  |  | Avatar Upload |
+| Post |  |  |  |  |  | Media Handling |
+| Comment |  |  |  |  |  | Threading, Moderation |
+| Message |  |  |  |  |  | Media, Status, Reactions |
+| Like |  |  |  |  |  | Reactions, Engagement |
 
 ## Message Operations
 
 | Operation | Basic | Advanced | Metadata | Special Cases |
 |-----------|-------|----------|----------|---------------|
-| Edit | ✓ | ✓ | ✓ | Time Window |
-| Status | ✓ | ✓ | ✓ | Multi-device Sync |
-| Reactions | ✓ | ✓ | ✓ | Custom Emojis |
-| Threading | ✓ | ✓ | ✓ | Merge/Split |
+| Edit |  |  |  | Time Window |
+| Status |  |  |  | Multi-device Sync |
+| Reactions |  |  |  | Custom Emojis |
+| Threading |  |  |  | Merge/Split |
 
 ## Like Operations
 
 | Operation | Basic | Advanced | Metadata | Special Cases |
 |-----------|-------|----------|----------|---------------|
-| Reactions | ✓ | ✓ | ✓ | Custom Types |
-| Visibility | ✓ | ✓ | ✓ | Tier Control |
-| Engagement | ✓ | ✓ | ✓ | Algorithms |
-| Batching | ✓ | ✓ | ✓ | Rollbacks |
+| Reactions |  |  |  | Custom Types |
+| Visibility |  |  |  | Tier Control |
+| Engagement |  |  |  | Algorithms |
+| Batching |  |  |  | Rollbacks |
 
 ## System Features
 
 | Feature | Basic | Advanced | Monitoring | Special Cases |
 |---------|-------|----------|------------|---------------|
-| Rate Limiting | ✓ | ✓ | ✓ | Bypass Prevention |
-| Caching | ✓ | ✓ | ✓ | Consistency |
-| Error Handling | ✓ | ✓ | ✓ | Recovery |
-| Security | ✓ | ✓ | ✓ | Penetration Tests |
+| Rate Limiting |  |  |  | Bypass Prevention |
+| Caching |  |  |  | Consistency |
+| Error Handling |  |  |  | Recovery |
+| Security |  |  |  | Penetration Tests |
 
 ## Performance & Reliability
 
 | Feature | Testing | Monitoring | Alerts | Recovery |
 |---------|---------|------------|---------|----------|
-| Rate Limits | ✓ | ✓ | ✓ | Auto-scaling |
-| Cache | ✓ | ✓ | ✓ | Auto-healing |
-| Concurrency | ✓ | ✓ | ✓ | Fallbacks |
-| Error Rates | ✓ | ✓ | ✓ | Circuit Breaking |
+| Rate Limits |  |  |  | Auto-scaling |
+| Cache |  |  |  | Auto-healing |
+| Concurrency |  |  |  | Fallbacks |
+| Error Rates |  |  |  | Circuit Breaking |
 
 ## Infrastructure Tests
 
 | Component | Health Check | Failover | Recovery | Monitoring |
 |-----------|--------------|----------|----------|------------|
-| Database | ✓ | ✓ | ✓ | ✓ |
-| Cache | ✓ | ✓ | ✓ | ✓ |
-| Search | ✓ | ✓ | ✓ | ✓ |
-| Storage | ✓ | ✓ | ✓ | ✓ |
+| Database |  |  |  |  |
+| Cache |  |  |  |  |
+| Search |  |  |  |  |
+| Storage |  |  |  |  |
 
 ## Test Coverage Updates
 - ✅ Added comprehensive rate limiting tests

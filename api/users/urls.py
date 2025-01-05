@@ -1,9 +1,11 @@
 # users/urls.py
 
 from django.urls import path
-from .views import UserListView, UserDetailView
+from . import views
 
 urlpatterns = [
-    path('users/', UserListView.as_view(), name='user-list'),
-    path('users/<int:pk>/', UserDetailView.as_view(), name='user-detail'),
+    path('', views.landing_page, name='landing-page'),
+    path('auth/register/', views.register, name='register'),
+    path('auth/login/', views.login, name='login'),
+    path('auth/welcome/', views.welcome_auth, name='welcome-auth'),
 ]

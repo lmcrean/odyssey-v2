@@ -8,7 +8,6 @@ import os
 
 class MessageEndpointTests(unittest.TestCase):
     """Test suite for message endpoints."""
-    
     def setUp(self):
         """Set up base URLs and auth."""
         self.base_url = os.getenv('API_URL', 'http://localhost:8000')

@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 
 
 class Follower(models.Model):
@@ -12,10 +12,14 @@ class Follower(models.Model):
     'unique_together' makes sure a user can't 'double follow' the same user.
     """
     owner = models.ForeignKey(
-        User, related_name='following', on_delete=models.CASCADE
+        settings.AUTH_USER_MODEL,
+        related_name='following',
+        on_delete=models.CASCADE
     )
     followed = models.ForeignKey(
-        User, related_name='followed', on_delete=models.CASCADE
+        settings.AUTH_USER_MODEL,
+        related_name='followed',
+        on_delete=models.CASCADE
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -24,4 +28,4 @@ class Follower(models.Model):
         unique_together = ['owner', 'followed']
 
     def __str__(self):
-        return f'{self.owner} {self.followed}'
+        return f'{self.owner} follows {self.followed}'
