@@ -6,6 +6,7 @@ Verifies endpoint health and response formats.
 import unittest
 import requests
 import os
+import uuid
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -16,8 +17,10 @@ class AuthEndpointTests(unittest.TestCase):
         """Set up base URLs and test data."""
         self.base_url = os.getenv('API_URL', 'http://localhost:8000')
         self.headers = {'Content-Type': 'application/json'}
+        # Generate a unique username for each test run
+        unique_id = str(uuid.uuid4())[:8]
         self.test_user = {
-            'username': 'testuser',
+            'username': f'testuser_{unique_id}',
             'password': 'testpass123',
             'name': 'Test User'
         }
