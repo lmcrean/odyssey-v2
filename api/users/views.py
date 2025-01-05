@@ -1,16 +1,14 @@
 # users/views.py
 
-from django.contrib.auth.models import User
-from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework import status
-from .serializers import UserSerializer
+from django.contrib.auth import get_user_model, authenticate
+from rest_framework import generics, status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
-from django.contrib.auth import authenticate
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import UserRegistrationSerializer
+from .serializers import UserSerializer, UserRegistrationSerializer
+
+User = get_user_model()
 
 class UserListView(generics.ListAPIView):
     queryset = User.objects.all()
@@ -40,10 +38,11 @@ def register(request):
     serializer = UserRegistrationSerializer(data=request.data)
     if serializer.is_valid():
         user = serializer.save()
+        refresh = RefreshToken.for_user(user)
         return Response({
-            'token': str(RefreshToken.for_user(user).access_token),
-            'profile_id': user.id,
-            'email': user.email,
+            'token': str(refresh.access_token),
+            'user_id': user.id,
+            'username': user.username,
             'name': user.name
         }, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -51,15 +50,16 @@ def register(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def login(request):
-    email = request.data.get('email')
+    username = request.data.get('username')
     password = request.data.get('password')
     
-    user = authenticate(email=email, password=password)
+    user = authenticate(username=username, password=password)
     if user:
         refresh = RefreshToken.for_user(user)
         return Response({
             'token': str(refresh.access_token),
-            'profile_id': user.id
+            'user_id': user.id,
+            'username': user.username
         }, status=status.HTTP_200_OK)
     return Response({
         'error': 'Invalid credentials'

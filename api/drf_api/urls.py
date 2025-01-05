@@ -17,9 +17,13 @@ from django.contrib import admin
 from django.urls import path, include
 from django.views.generic import TemplateView
 from .views import logout_route
+from users.views import landing_page, register, login, welcome_auth
 
 urlpatterns = [
-    path('', TemplateView.as_view(template_name='index.html')),
+    path('', landing_page, name='landing-page'),
+    path('auth/register/', register, name='register'),
+    path('auth/login/', login, name='login'),
+    path('auth/welcome/', welcome_auth, name='welcome-auth'),
     path('admin/', admin.site.urls),
     path('api/api-auth/', include('rest_framework.urls')),
     # our logout route has to be above the default one to be matched first

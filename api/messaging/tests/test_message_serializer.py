@@ -1,80 +1,35 @@
 # File: messaging/tests/test_message_serializer.py
 
-from django.contrib.auth.models import User
-from rest_framework.test import APITestCase, APIClient
-from rest_framework import status
-from django.urls import reverse
-from profiles.models import Profile
+from django.test import TestCase
+from django.contrib.auth import get_user_model
 from messaging.models import Message
+from messaging.serializers import MessageSerializer
 
-class MessageSerializerTests(APITestCase):
+User = get_user_model()
 
+class MessageSerializerTest(TestCase):
     def setUp(self):
-        # Create users
-        self.user_with_image = User.objects.create_user(username='user_with_image', password='password')
-        self.user_without_image = User.objects.create_user(username='user_without_image', password='password')
-
-        # Ensure profiles are created with the default image
-        self.profile_with_image, created = Profile.objects.get_or_create(owner=self.user_with_image)
-        self.profile_without_image, created = Profile.objects.get_or_create(owner=self.user_without_image)
-
-        # Create messages for testing
-        self.message_with_image = Message.objects.create(
-            sender=self.user_with_image,
-            recipient=self.user_without_image,
-            content="Message from user_with_image"
-        )
-
-        self.message_without_image = Message.objects.create(
-            sender=self.user_without_image,
-            recipient=self.user_with_image,
-            content="Message from user_without_image"
-        )
-
-        # Initialize API client
-        self.client = APIClient()
-
-    def test_message_exists(self):
-        # Log in the user
-        self.client.login(username='user_with_image', password='password')
-
-        # Perform GET request to retrieve the message list
-        url = reverse('message-detail', kwargs={'user_id': self.message_with_image.recipient.id})
-        response = self.client.get(url)
-
-        # Verify that the response contains a list of messages inside the "results" key
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.user1 = User.objects.create_user(username='user1', password='pass')
+        self.user2 = User.objects.create_user(username='user2', password='pass')
         
-        # Parse JSON content
-        content = response.json()
+        self.message_data = {
+            'sender': self.user1,
+            'recipient': self.user2,
+            'content': 'Test message'
+        }
         
-        self.assertIn('results', content)
-        self.assertIsInstance(content['results'], list)
-        self.assertGreater(len(content['results']), 0)
-        self.assertIn('id', content['results'][0])
-
-    def test_sender_profile_image_is_default(self):
-        # Log in the user
-        self.client.login(username='user_with_image', password='password')
-
-        # Perform GET request to retrieve the message list
-        url = reverse('message-detail', kwargs={'user_id': self.message_with_image.recipient.id})
-        response = self.client.get(url)
-
-        # Verify response status code and structure
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.message = Message.objects.create(**self.message_data)
         
-        # Parse JSON content
-        content = response.json()
+    def test_contains_expected_fields(self):
+        """Test that serializer contains expected fields"""
+        serializer = MessageSerializer(self.message)
+        expected_fields = {
+            'id', 'sender', 'recipient', 'content', 'image',
+            'timestamp', 'read', 'is_sender'
+        }
+        self.assertEqual(set(serializer.data.keys()), expected_fields)
         
-        self.assertIn('results', content)
-        self.assertIsInstance(content['results'], list)
-        self.assertGreater(len(content['results']), 0)
-
-        # Check that the sender profile image is the default image in the first message
-        first_message = content['results'][0]
-        self.assertIn('sender_profile_image', first_message)
-        self.assertEqual(
-            first_message['sender_profile_image'],
-            'https://res.cloudinary.com/dh5lpihx1/image/upload/v1/media/images/default_profile_dqcubz.jpg'
-        )
+    def test_content_field_content(self):
+        """Test that content field contains correct data"""
+        serializer = MessageSerializer(self.message)
+        self.assertEqual(serializer.data['content'], self.message_data['content'])

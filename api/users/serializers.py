@@ -9,7 +9,7 @@ User = get_user_model()
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'email', 'name', 'date_joined', 'updated_at')
+        fields = ('id', 'username', 'name', 'date_joined', 'updated_at')
         read_only_fields = ('id', 'date_joined', 'updated_at')
 
 
@@ -18,12 +18,12 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ('id', 'email', 'name', 'password', 'token')
+        fields = ('id', 'username', 'name', 'password', 'token')
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
         user = User.objects.create_user(
-            email=validated_data['email'],
+            username=validated_data['username'],
             name=validated_data['name'],
             password=validated_data['password']
         )
