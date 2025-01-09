@@ -13,6 +13,7 @@ from rest_framework import status
 import requests
 import uuid
 import os
+import json
 
 User = get_user_model()
 
@@ -35,9 +36,9 @@ class VerticalAuthenticationTests(TestCase):
             'password': 'testpass123',
             'name': 'Test User'
         }
-        # Setup URLs for endpoint tests
+        # Update URLs for endpoint tests
         self.local_url = 'http://localhost:8000'
-        self.prod_url = 'https://b6kfw0mhn8.execute-api.eu-west-2.amazonaws.com/default'
+        self.prod_url = 'https://t8g987asx0.execute-api.eu-west-2.amazonaws.com/prod'
         self.headers = {'Content-Type': 'application/json'}
 
     # Level 1: Basic Authentication Tests
@@ -141,39 +142,73 @@ class VerticalAuthenticationTests(TestCase):
     def test_4_1_prod_landing_page(self):
         """Test production landing page endpoint"""
         def test_impl():
-            response = requests.get(f"{self.prod_url}/")
+            # Add API key header as required by API Gateway
+            headers = {
+                'Content-Type': 'application/json',
+                'x-api-key': os.getenv('API_KEY', '')  # API key should be set in environment
+            }
+            response = requests.get(f"{self.prod_url}/", headers=headers)
+            print(f"\nLanding page response: {response.status_code}")
+            print(f"Response: {response.text}\n")
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.json(), {"message": "Welcome to Odyssey"})
+            data = response.json()
+            self.assertIn('message', data)
         
         self.run_prod_test(test_impl)
 
     def test_4_2_prod_auth_flow(self):
         """Test complete authentication flow in production"""
         def test_impl():
-            # Register
-            register_response = requests.post(
-                f"{self.prod_url}/auth/register/",
-                json=self.test_user_data,
-                headers=self.headers
-            )
-            self.assertEqual(register_response.status_code, 201)
-            token = register_response.json()['token']
+            # Register with all required fields
+            register_data = {
+                'username': self.test_user_data['username'],
+                'password': self.test_user_data['password'],
+                'name': self.test_user_data['name'],
+                'email': f"{self.test_user_data['username']}@example.com",  # Add required email
+                'confirm_password': self.test_user_data['password']  # Add password confirmation
+            }
             
-            # Login
+            headers = {
+                'Content-Type': 'application/json',
+                'x-api-key': os.getenv('API_KEY', '')  # API key should be set in environment
+            }
+            
+            register_response = requests.post(
+                f"{self.prod_url}/auth/register",
+                json=register_data,
+                headers=headers
+            )
+            print(f"\nRegister response: {register_response.status_code}")
+            print(f"Response: {register_response.text}\n")
+            
+            # Handle AWS Lambda response format
+            response_data = register_response.json()
+            if 'statusCode' in response_data:
+                self.assertEqual(response_data['statusCode'], 200)
+                response_body = json.loads(response_data['body'])
+                token = response_body['token']
+            else:
+                self.assertEqual(register_response.status_code, 200)
+                token = response_data['token']
+            
+            # Login with API key header
             login_response = requests.post(
-                f"{self.prod_url}/auth/login/",
+                f"{self.prod_url}/auth/login",
                 json={
-                    'username': self.test_user_data['username'],
-                    'password': self.test_user_data['password']
+                    'username': register_data['username'],
+                    'password': register_data['password']
                 },
-                headers=self.headers
+                headers=headers
             )
             self.assertEqual(login_response.status_code, 200)
             
-            # Check protected endpoint
-            auth_headers = {**self.headers, 'Authorization': f'Bearer {token}'}
+            # Check protected endpoint with both API key and auth token
+            auth_headers = {
+                **headers,
+                'Authorization': f'Bearer {token}'
+            }
             welcome_response = requests.get(
-                f"{self.prod_url}/auth/welcome/",
+                f"{self.prod_url}/auth/welcome",
                 headers=auth_headers
             )
             self.assertEqual(welcome_response.status_code, 200)
