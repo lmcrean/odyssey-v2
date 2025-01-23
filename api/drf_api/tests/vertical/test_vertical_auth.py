@@ -44,6 +44,7 @@ class VerticalAuthenticationTests(TestCase):
         # Update URLs for endpoint tests
         self.local_url = 'http://localhost:8000'
         self.prod_url = 'https://t8g987asx0.execute-api.eu-west-2.amazonaws.com/prod'
+        self.request_timeout = 10  # Timeout in seconds
         
         # Load API key from .env file
         env_path = Path(__file__).parent.parent.parent.parent / '.env'
@@ -202,7 +203,7 @@ class VerticalAuthenticationTests(TestCase):
         def test_impl():
             # Sign request with both API key and IAM auth
             headers = self.sign_request('GET', f"{self.prod_url}{self.endpoints['landing']}", headers=self.headers)
-            response = requests.get(f"{self.prod_url}{self.endpoints['landing']}", headers=headers)
+            response = requests.get(f"{self.prod_url}{self.endpoints['landing']}", headers=headers, timeout=self.request_timeout)
             print(f"\nLanding page response: {response.status_code}")
             print(f"Headers sent: {headers}")
             print(f"Response: {response.text}\n")
@@ -240,7 +241,8 @@ class VerticalAuthenticationTests(TestCase):
             register_response = requests.post(
                 f"{self.prod_url}{self.endpoints['register']}",
                 json=register_data,
-                headers=headers
+                headers=headers,
+                timeout=self.request_timeout
             )
             print(f"\nRegister response: {register_response.status_code}")
             print(f"Headers sent: {headers}")
@@ -268,7 +270,8 @@ class VerticalAuthenticationTests(TestCase):
                 login_response = requests.post(
                     f"{self.prod_url}{self.endpoints['login']}",
                     json=login_data,
-                    headers=login_headers
+                    headers=login_headers,
+                    timeout=self.request_timeout
                 )
                 login_data = login_response.json()
                 self.assertEqual(login_data['statusCode'], 200)
@@ -290,7 +293,8 @@ class VerticalAuthenticationTests(TestCase):
             
             welcome_response = requests.get(
                 f"{self.prod_url}{self.endpoints['welcome']}",
-                headers=welcome_headers
+                headers=welcome_headers,
+                timeout=self.request_timeout
             )
             welcome_data = welcome_response.json()
             self.assertEqual(welcome_data['statusCode'], 200)
