@@ -4,6 +4,18 @@ Vertical Authentication Testing Suite
 This module implements a vertical testing approach for authentication,
 progressing from simple unit tests to complex integration and endpoint tests.
 Tests are ordered to run from basic functionality to complete user journeys.
+
+The Vertical Authentication confirms that the following:
+1. The landing page is accessible without authentication
+2. User registration is successful
+3. User login is successful
+4. The protected welcome endpoint is accessible with valid credentials
+5. The protected welcome endpoint is not accessible without valid credentials
+6. TODO: User Logout is successful
+7. TODO: User Deletion is successful
+8. TODO: User Update is successful
+9. TODO: User Password Reset is successful
+10. TODO: User Password Reset Confirmation is successful
 """
 
 import uuid
