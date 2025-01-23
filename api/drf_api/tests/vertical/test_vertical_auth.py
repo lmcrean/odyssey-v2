@@ -6,20 +6,20 @@ progressing from simple unit tests to complex integration and endpoint tests.
 Tests are ordered to run from basic functionality to complete user journeys.
 """
 
-from django.test import TestCase
-from django.contrib.auth import get_user_model
-from rest_framework.test import APIClient
-from rest_framework import status
-import requests
 import uuid
 import os
 import json
-from pathlib import Path
 import boto3
-from botocore.auth import SigV4Auth
-from botocore.awsrequest import AWSRequest
-import urllib3
+import requests
 
+
+from django.test import TestCase
+from django.contrib.auth import get_user_model
+from pathlib import Path
+from botocore.auth import SigV4Auth # noqa
+from botocore.awsrequest import AWSRequest # noqa
+from rest_framework.test import APIClient # noqa
+from rest_framework import status # noqa
 User = get_user_model()
 
 class VerticalAuthenticationTests(TestCase):
@@ -29,6 +29,10 @@ class VerticalAuthenticationTests(TestCase):
     2. Complete auth flows (from test_auth_flow.py)
     3. API endpoint health checks
     4. Production endpoint verification
+
+    To run this test suite, run the following command:
+
+    python manage.py test drf_api.tests.vertical.test_vertical_auth
     """
     
     def setUp(self):
@@ -69,7 +73,6 @@ class VerticalAuthenticationTests(TestCase):
             'Content-Type': 'application/json',
             'x-api-key': self.api_key
         }
-        
         # API endpoints
         self.endpoints = {
             'landing': '/welcome-noauth',
@@ -82,7 +85,6 @@ class VerticalAuthenticationTests(TestCase):
         """Sign a request with AWS SigV4"""
         if headers is None:
             headers = {}
-        
         # Create AWS request
         request = AWSRequest(
             method=method,
@@ -90,14 +92,11 @@ class VerticalAuthenticationTests(TestCase):
             data=json.dumps(data) if data else None,
             headers=headers
         )
-        
         # Sign with SigV4
         SigV4Auth(self.credentials, "execute-api", "eu-west-2").add_auth(request)
-        
         # Get signed headers and add API key
         signed_headers = dict(request.headers)
         signed_headers['x-api-key'] = self.api_key
-        
         return signed_headers
 
     # Level 1: Basic Authentication Tests
@@ -124,12 +123,10 @@ class VerticalAuthenticationTests(TestCase):
             password=self.test_user_data['password'],
             name=self.test_user_data['name']
         )
-        
         response = self.client.post('/auth/login/', {
             'username': self.test_user_data['username'],
             'password': self.test_user_data['password']
         }, format='json')
-        
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertIn('token', data)
@@ -204,9 +201,6 @@ class VerticalAuthenticationTests(TestCase):
             # Sign request with both API key and IAM auth
             headers = self.sign_request('GET', f"{self.prod_url}{self.endpoints['landing']}", headers=self.headers)
             response = requests.get(f"{self.prod_url}{self.endpoints['landing']}", headers=headers, timeout=self.request_timeout)
-            print(f"\nLanding page response: {response.status_code}")
-            print(f"Headers sent: {headers}")
-            print(f"Response: {response.text}\n")
             
             # Handle Lambda response format
             data = response.json()
@@ -219,7 +213,7 @@ class VerticalAuthenticationTests(TestCase):
 
     def test_4_2_prod_auth_flow(self):
         """Test complete authentication flow in production"""
-        def test_impl():
+        def test_impl():  # noqa: F841  # Used indirectly via run_prod_test
             # Register with all required fields
             register_data = {
                 'username': self.test_user_data['username'],
@@ -229,7 +223,6 @@ class VerticalAuthenticationTests(TestCase):
                 'confirm_password': self.test_user_data['password'],
                 'phone': '+1234567890'  # Add required phone field
             }
-            
             # Sign registration request
             headers = self.sign_request(
                 'POST',
@@ -244,10 +237,6 @@ class VerticalAuthenticationTests(TestCase):
                 headers=headers,
                 timeout=self.request_timeout
             )
-            print(f"\nRegister response: {register_response.status_code}")
-            print(f"Headers sent: {headers}")
-            print(f"Request body: {register_data}")
-            print(f"Response: {register_response.text}\n")
             
             # Handle AWS Lambda response format
             response_data = register_response.json()
@@ -299,4 +288,4 @@ class VerticalAuthenticationTests(TestCase):
             welcome_data = welcome_response.json()
             self.assertEqual(welcome_data['statusCode'], 200)
             welcome_body = json.loads(welcome_data['body'])
-            self.assertIn('message', welcome_body) 
+            self.assertIn('message', welcome_body)
